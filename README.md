@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://bunk-cal.vercel.app"><img src="https://img.shields.io/badge/live-bunk--cal.vercel.app-24352b?style=flat-square&logo=vercel&logoColor=efd28a" alt="Live demo" /></a>
+  <a href="https://bunkv2.vercel.app"><img src="https://img.shields.io/badge/live-bunkv2.vercel.app-24352b?style=flat-square&logo=vercel&logoColor=efd28a" alt="Live demo" /></a>
   <img src="https://img.shields.io/badge/React-18-24352b?style=flat-square&logo=react&logoColor=efd28a" alt="React 18" />
   <img src="https://img.shields.io/badge/TypeScript-5.7-24352b?style=flat-square&logo=typescript&logoColor=efd28a" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Vite-6-24352b?style=flat-square&logo=vite&logoColor=efd28a" alt="Vite 6" />
@@ -54,11 +54,11 @@ No account, no sign-in, no server. Your counts save in `localStorage`.
 credits × 3 = what you can skip
 ```
 
-| Credits | Bunks allowed |
-| :-----: | :-----------: |
-| 1 | 3 |
-| 3 | 9 |
-| 5 | 15 |
+| Credits | Bunks allowed | Typical course |
+| :-----: | :-----------: | :------------- |
+| 1 | 3 | Labs, workshops, seminars |
+| 3 | 9 | Core theory courses & electives |
+| 5 | 15 | Intensive engineering modules |
 
 That's the entire model. No percentage targets, no "you can miss 2 more classes before you're in trouble" arithmetic — the gauge at the top reads the share of your allowance still in hand and calls it **semester attendance**.
 
@@ -112,14 +112,17 @@ The strokes never stretch. A group of five still reads as five, at any width.
 | | Feature | What it does |
 | :--- | :--- | :--- |
 | ✏️ | **Chalk tallies** | Strokes draw themselves in with a hand-drawn filter, one per bunk. |
+| 🎮 | **Interactive Sandbox** | Test different courses, tap +1, and watch the chalk draw on the live demo slate. |
+| 🔊 | **Tactile Chalk Audio** | Synthesized soft chalk friction sound via Web Audio API with mute toggle. |
+| 🔍 | **Formula Inspector** | Interactive slider demonstrating why `Credits × 3` matches the 75% rule. |
 | 🔢 | **Type the count** | Junk, negatives and over-allowance numbers are refused — the tally stays honest. |
-| ⚖️ | **Edit a subject** | Rename it or change credits. New allowance recalculates instantly; it refuses to shrink below bunks already used. |
+| ⚖️ | **Edit a subject** | Rename it or change credits. New allowance recalculates instantly; refuses to shrink below bunks used. |
 | 🧮 | **Live totals** | Subjects, allowed, used, remaining and the attendance needle update on every tap. |
-| 💾 | **Autosave** | Every change is written to `localStorage` under `bunkmate:v1`. Reload and the board is exactly as you left it. |
+| 💾 | **Autosave** | Every change is written to `localStorage` under `bunkmate:v1`. Reload and the board is untouched. |
 | 🧽 | **Wipe all tallies** | Zero every count without losing the subject list. Asks twice. |
 | 🆕 | **New board** | Start a fresh semester. Asks twice. |
 | 🚫 | **No duplicates** | `ds` and `DS ` collide — each subject name appears once. |
-| ♿ | **Keyboard & motion** | Real labels on every control, a polite live region for changes, dashed focus rings, and `prefers-reduced-motion` respected throughout. |
+| ♿ | **Keyboard & motion** | Real labels on every control, polite live regions, and `prefers-reduced-motion` respected throughout. |
 
 <br />
 
@@ -129,23 +132,24 @@ The strokes never stretch. A group of five still reads as five, at any width.
 | :--- | :--- | :--- |
 | UI | **React 18 + TypeScript** | Small state machine: `landing → setup → board`. |
 | Build | **Vite 6** | Instant dev loop, one static bundle. |
-| Styling | **Tailwind CSS 4** | Theme tokens for the board, chalk and wood palette. |
-| Type | **Gloria Hallelujah + Patrick Hand** | Chalk lettering that still reads at 11px. |
+| Styling | **Tailwind CSS 4** | Authentic slate blackboard, chalk and wood palette with brass corner accents. |
+| Type | **Gloria Hallelujah + Patrick Hand + Caveat** | Chalk lettering that remains legible across mobile & desktop. |
+| Audio | **Web Audio API** | Procedural chalk friction noise with zero audio assets. |
 | Storage | **`localStorage`** | No backend, no account, no data leaving the device. |
-| Hosting | **Vercel** | Static build, deployed from this repo. |
+| Hosting | **Vercel** | Static build, deployed live at [bunkv2.vercel.app](https://bunkv2.vercel.app). |
 
 <br />
 
 ## Run it locally
 
 ```bash
-git clone https://github.com/yuvanreddy404/bunk_cal.git
-cd bunk_cal
+git clone https://github.com/saiujwal-hub/bunkmate.git
+cd bunkmate
 npm install
 npm run dev
 ```
 
-Open <http://localhost:5173> and click **Open the board**.
+Open <http://localhost:5199> and click **Open the board**.
 
 | Script | Does |
 | :--- | :--- |
@@ -161,7 +165,7 @@ Open <http://localhost:5173> and click **Open the board**.
 src/
 ├── App.tsx                  # landing → setup → board, and the autosave
 ├── components/
-│   ├── Landing.tsx          # the blackboard pitch
+│   ├── Landing.tsx          # the redesigned interactive blackboard pitch
 │   ├── SetupScreen.tsx      # how many subjects, then names + credits
 │   ├── CalculatorScreen.tsx # totals, gauge, rows, reset / new board
 │   ├── SubjectRow.tsx       # one subject: tally, count, edit, delete
@@ -187,6 +191,6 @@ src/
 ---
 
 <p align="center">
-  <sub>made by hackathon <b>Badcows</b> · <a href="https://bunk-cal.vercel.app">bunk-cal.vercel.app</a></sub><br />
+  <sub>made by hackathon <b>Badcows</b> · <a href="https://bunkv2.vercel.app">bunkv2.vercel.app</a></sub><br />
   <sub><i>Chalk, not spreadsheets.</i></sub>
 </p>
