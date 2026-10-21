@@ -174,7 +174,7 @@ export default function SubjectRow({ subject, allNames, onSetUsed, onEdit, onDel
           {subject.name}
         </h3>
         <small className="block font-hand text-[0.82rem] text-chalk/55">
-          {subject.credits} credits — max {max}
+          {subject.credits} credit{subject.credits === 1 ? "" : "s"} — max {max}
         </small>
       </div>
 
