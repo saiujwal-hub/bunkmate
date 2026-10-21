@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Gloria Hallelujah", "Segoe Print", cursive;
+  --font-hand: "Patrick Hand", "Segoe Print", cursive;
+
+  --color-board: #24352b;
+  --color-board-deep: #1b2a21;
+  --color-chalk: #ece9dc;
+  --color-chalky: #efd28a;
+  --color-chalkpink: #e8a9a0;
+  --color-wood: #6b4a2f;
+  --color-wood-deep: #503722;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 22px 14px 40px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0 2px, transparent 2px 6px),
+    radial-gradient(1200px 500px at 50% 0%, #7a5738, var(--color-wood-deep) 75%);
+  display: flex;
+  justify-content: center;
+  color-scheme: dark;
+}
+
+/* Handwritten digits stay legible inside chalk inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  opacity: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px dashed var(--color-chalky);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dial__needle {
+    transition: none !important;
+  }
+}
+
+/* The mounted board: wood frame, glazed green surface, deep inner glow */
+.chalk-board {
+  padding: 26px 32px 24px;
+  border: 12px solid var(--color-wood);
+  border-radius: 14px;
+  background: radial-gradient(
+    ellipse at 30% 18%,
+    #2c4033 0%,
+    var(--color-board) 45%,
+    var(--color-board-deep) 100%
+  );
+  box-shadow:
+    inset 0 0 46px rgba(0, 0, 0, 0.55),
+    0 0 0 2px var(--color-wood-deep),
+    0 24px 48px -18px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-hand);
+}
+
+@media (max-width: 760px) {
+  .chalk-board {
+    padding: 20px 16px 18px;
+  }
+}
+
+/* The chalk tray that hangs under a real blackboard */
+.chalk-tray {
+  width: 72%;
+  margin-inline: auto;
+  background: linear-gradient(to bottom, var(--color-wood) 0%, var(--color-wood-deep) 100%);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  padding-inline: 18px;
+}
+
+@media (max-width: 760px) {
+  .chalk-tray {
+    width: 88%;
+  }
+}
+
+/* Lines that write themselves onto the board — one entrance, then stillness */
+.chalk-write {
+  opacity: 0;
+  transform: translateY(4px);
+  animation: chalk-write-in 0.45s ease-out forwards;
+}
+
+@keyframes chalk-write-in {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chalk-write {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
