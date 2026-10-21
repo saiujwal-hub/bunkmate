@@ -33,6 +33,27 @@ export function totalsOf(subjects: Subject[]): Totals {
   return { subjects: subjects.length, max, used, remaining: max - used };
 }
 
+/** Total classes in the semester derived from the 75% attendance rule (credits × 3 bunks = 25% absenteeism, so 12 classes per credit). */
+export function totalClassesOf(s: Pick<Subject, "credits">): number {
+  return maxBunks(s) * 4;
+}
+
+/** Subject attendance percentage: (totalClasses - bunksUsed) / totalClasses * 100 */
+export function attendanceOf(s: Subject): number {
+  const total = totalClassesOf(s);
+  if (total <= 0) return 100;
+  const attended = Math.max(0, total - s.bunksUsed);
+  return (attended / total) * 100;
+}
+
+/** Overall semester attendance percentage: (totalClasses - totalUsed) / totalClasses * 100 */
+export function semesterAttendanceOf(totals: Totals): number {
+  const totalClasses = totals.max * 4;
+  if (totalClasses <= 0) return 100;
+  const attended = Math.max(0, totalClasses - totals.used);
+  return (attended / totalClasses) * 100;
+}
+
 export function isPositiveWhole(n: number): boolean {
   return Number.isInteger(n) && n >= 1;
 }

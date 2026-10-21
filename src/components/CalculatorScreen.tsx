@@ -1,9 +1,8 @@
 import { useRef, useState } from "react";
 import type { Subject } from "../lib/types";
-import { isPositiveWhole, totalsOf } from "../lib/calc";
+import { totalsOf, semesterAttendanceOf } from "../lib/calc";
 import GaugeDial from "./GaugeDial";
 import SubjectRow, { type NotifyFn } from "./SubjectRow";
-import { chalkBtn, chalkBtnDangerArmed } from "./ui";
 
 interface Props {
   subjects: Subject[];
@@ -18,7 +17,7 @@ type Flash = { tone: "warn" | "calm"; text: string } | null;
 
 function statusLine(remaining: number, max: number): string {
   if (max <= 0) return "";
-  if (remaining === 0) return "Every bunk is spent. Attend everything from here on.";
+  if (remaining === 0) return "Every bunk is spent. Attend everything from here on (75% minimum threshold reached).";
   const share = remaining / max;
   const mood =
     share > 0.6 ? "Plenty of room." : share > 0.3 ? "Halfway spent." : "Running low.";
@@ -34,9 +33,23 @@ export default function CalculatorScreen({
   onNewBoard,
 }: Props) {
   const totals = totalsOf(subjects);
-  /* Same maths as the needle: what remains of the allowance, said as attendance. */
-  const attendance = totals.max > 0 ? ((totals.max - totals.used) / totals.max) * 100 : 100;
+
+  /*
+   * True Semester Attendance Calculation:
+   * Each credit buys 3 bunks under the 75% attendance rule (3 bunks = 25% of 12 classes).
+   * Total semester classes = totals.max × 4.
+   * Total classes attended = totalClasses - totals.used.
+   * Attendance % = (attended / totalClasses) × 100 = 100 - (totals.used / totals.max) × 25.
+   * - 0 bunks used => 100.0% attendance.
+   * - totals.max bunks used => 75.0% attendance (the required minimum threshold!).
+   */
+  const attendance = semesterAttendanceOf(totals);
   const attnLabel = `${Number((Math.round(attendance * 10) / 10).toFixed(1))}%`;
+
+  /* Allowance buffer still in hand (0% to 100% of allowed bunks) */
+  const bufferRemaining = totals.max > 0 ? (totals.remaining / totals.max) * 100 : 100;
+  const bufferLabel = `${Number((Math.round(bufferRemaining * 10) / 10).toFixed(1))}%`;
+
   const [flash, setFlash] = useState<Flash>(null);
   const [resetArmed, setResetArmed] = useState(false);
   const [newArmed, setNewArmed] = useState(false);
@@ -48,8 +61,6 @@ export default function CalculatorScreen({
     if (flashTimer.current) clearTimeout(flashTimer.current);
     flashTimer.current = setTimeout(() => setFlash(null), 4200);
   };
-
-  const percentLeft = totals.max > 0 ? Math.round((totals.remaining / totals.max) * 100) : 0;
 
   const tapReset = () => {
     if (resetArmed) {
@@ -79,7 +90,10 @@ export default function CalculatorScreen({
     { big: String(totals.max), small: "bunks allowed" },
     { big: String(totals.used), small: "bunks used" },
     { big: String(totals.remaining), small: "bunks remaining" },
+    { big: bufferLabel, small: "allowance buffer left" },
   ];
+
+  const allNames = subjects.map((s) => ({ name: s.name, ignoreKey: s.id }));
 
   return (
     <div className="chalk-board relative w-full max-w-[1120px] font-hand text-chalk">
@@ -99,11 +113,17 @@ export default function CalculatorScreen({
             {flash?.text ?? statusLine(totals.remaining, totals.max)}
           </p>
         </div>
-        <GaugeDial
-          percent={percentLeft}
-          big={attnLabel}
-          small="semester attendance"
-        />
+        <div className="flex flex-col items-center">
+          <GaugeDial
+            percent={attendance}
+            big={attnLabel}
+            small="semester attendance"
+            threshold={75}
+          />
+          <span className="mt-1 font-hand text-[0.82rem] text-chalk/50">
+            {totals.remaining} of {totals.max} bunks left ({bufferLabel} buffer)
+          </span>
+        </div>
       </header>
 
       {/* The week's sums, written across one chalk line. */}
@@ -121,7 +141,7 @@ export default function CalculatorScreen({
           <SubjectRow
             key={subject.id}
             subject={subject}
-            allNames={subjects.map((s) => ({ name: s.name, ignoreKey: s.id }))}
+            allNames={allNames}
             onSetUsed={onSetUsed}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -130,31 +150,27 @@ export default function CalculatorScreen({
         ))}
       </ol>
 
-      <footer className="mt-6 flex flex-wrap items-baseline justify-between gap-4 font-hand text-[0.92rem] text-chalk/55">
-        <p className="m-0 max-w-[62ch]">
-          One stroke = one bunked class. A subject's whole allowance is its credits × 3. Counts
-          save on this device.
-        </p>
-        <div className="flex flex-wrap items-baseline gap-2">
+      <footer className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t-2 border-dotted border-chalk/15 pt-5 max-sm:flex-col max-sm:items-start">
+        <div className="flex gap-4">
           <button
             type="button"
-            className={`${chalkBtn} ${resetArmed ? chalkBtnDangerArmed : ""}`}
+            className="rounded px-2 font-hand text-[0.95rem] text-chalk/60 underline decoration-dotted underline-offset-4 hover:text-chalkpink"
             onClick={tapReset}
           >
-            {resetArmed ? "sure? tap again" : "Wipe all tallies"}
+            {resetArmed ? "sure? tap again to wipe tallies" : "Wipe all tallies"}
           </button>
           <button
             type="button"
-            className={`${chalkBtn} ${newArmed ? chalkBtnDangerArmed : ""}`}
+            className="rounded px-2 font-hand text-[0.95rem] text-chalk/60 underline decoration-dotted underline-offset-4 hover:text-chalkpink"
             onClick={tapNew}
-            aria-label="Start a new bunk calculator"
           >
             {newArmed ? "sure? start fresh" : "New board"}
           </button>
         </div>
+        <span className="font-hand text-[0.85rem] text-chalk/45">
+          Counts stay on your device in localStorage
+        </span>
       </footer>
-
-      <p className="sr-only">Subjects tracked: {subjects.filter((s) => isPositiveWhole(s.credits)).length}</p>
     </div>
   );
 }

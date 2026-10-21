@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Subject } from "../lib/types";
-import { findDuplicateName, isPositiveWhole, maxBunks } from "../lib/calc";
+import { findDuplicateName, isPositiveWhole, maxBunks, attendanceOf } from "../lib/calc";
 import TallyStrokes from "./TallyStrokes";
 import { chalkBtn, chalkBtnPlain, chalkBtnDangerArmed, chalkInput, chalkLabel } from "./ui";
 
@@ -31,6 +31,8 @@ export default function SubjectRow({ subject, allNames, onSetUsed, onEdit, onDel
   const max = maxBunks(subject);
   const remaining = max - subject.bunksUsed;
   const isDone = remaining <= 0;
+  const subjAttendance = attendanceOf(subject);
+  const subjAttnLabel = `${Number((Math.round(subjAttendance * 10) / 10).toFixed(1))}%`;
 
   const posInt = (v: string) => isPositiveWhole(Number(v));
 
@@ -204,6 +206,9 @@ export default function SubjectRow({ subject, allNames, onSetUsed, onEdit, onDel
           aria-live="polite"
         >
           {isDone ? "none left, attend!" : `${remaining} left`}
+        </span>
+        <span className="font-hand text-[0.78rem] text-chalk/50">
+          {subjAttnLabel} attendance
         </span>
       </div>
 

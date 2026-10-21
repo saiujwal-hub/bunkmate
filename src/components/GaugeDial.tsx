@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
-  /** Bunks still available, as a share of the whole allowance. */
+  /** The value from 0 to 100 for the needle. */
   percent: number;
   big: string;
   small: string;
+  /** Cutoff marker on the dial (e.g. 75 for 75% attendance cutoff, or 25 for allowance). */
+  threshold?: number;
 }
 
 const RANGE: [number, number] = [0, 100];
@@ -15,22 +17,22 @@ function gaugePoint(value: number, radius: number) {
   return { x: 100 + radius * Math.sin(deg), y: 110 - radius * Math.cos(deg) };
 }
 
-function buildTicks() {
+function buildTicks(threshold: number = 75) {
   let markup = `<path d="M 14 110 A 86 86 0 0 1 186 110" fill="none" stroke="rgba(236,233,220,0.3)" stroke-width="2"/>`;
   for (let v = 0; v <= 100; v += 10) {
     const o = gaugePoint(v, 78);
     const i = gaugePoint(v, 70);
     markup += `<line x1="${o.x.toFixed(2)}" y1="${o.y.toFixed(2)}" x2="${i.x.toFixed(2)}" y2="${i.y.toFixed(2)}" stroke="rgba(236,233,220,0.4)" stroke-width="1.6"/>`;
   }
-  /* Pink marker at 25% — past this point the allowance is nearly spent. */
-  const ft = gaugePoint(25, 84);
-  const fb = gaugePoint(25, 64);
-  markup += `<line x1="${ft.x.toFixed(2)}" y1="${ft.y.toFixed(2)}" x2="${fb.x.toFixed(2)}" y2="${fb.y.toFixed(2)}" stroke="var(--color-chalkpink)" stroke-width="2"/>`;
+  /* Pink marker at cutoff threshold (75% attendance threshold or 25% allowance). */
+  const ft = gaugePoint(threshold, 84);
+  const fb = gaugePoint(threshold, 64);
+  markup += `<line x1="${ft.x.toFixed(2)}" y1="${ft.y.toFixed(2)}" x2="${fb.x.toFixed(2)}" y2="${fb.y.toFixed(2)}" stroke="var(--color-chalkpink)" stroke-width="2.5"/>`;
   return markup;
 }
 
 /* Load moment: the needle starts parked low, then swings up. */
-export default function GaugeDial({ percent, big, small }: Props) {
+export default function GaugeDial({ percent, big, small, threshold = 75 }: Props) {
   const [armed, setArmed] = useState(false);
   const needle = useRef<SVGLineElement>(null);
 
@@ -40,7 +42,6 @@ export default function GaugeDial({ percent, big, small }: Props) {
       requestAnimationFrame(() => setArmed(true)),
     );
     return () => cancelAnimationFrame(t);
-    // Park-and-swing belongs to load time only; later values just transition.
   }, []);
 
   const angle = ((Math.min(Math.max(percent, RANGE[0]), RANGE[1]) - 50) * 1.8).toFixed(2);
@@ -48,7 +49,7 @@ export default function GaugeDial({ percent, big, small }: Props) {
   return (
     <figure className="w-[205px] max-sm:mx-auto max-sm:w-[160px] text-center" aria-hidden="true" style={{ margin: 0 }}>
       <svg viewBox="0 0 200 124" className="w-full block">
-        <g dangerouslySetInnerHTML={{ __html: buildTicks() }} />
+        <g dangerouslySetInnerHTML={{ __html: buildTicks(threshold) }} />
         <line
           ref={needle}
           x1={100}

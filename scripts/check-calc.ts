@@ -7,6 +7,9 @@ import {
   isPositiveWhole,
   maxBunks,
   totalsOf,
+  totalClassesOf,
+  attendanceOf,
+  semesterAttendanceOf,
 } from "../src/lib/calc.ts";
 
 const assert = (cond: any, label: string) => {
@@ -36,6 +39,8 @@ for (const [credits, expected] of table) {
 const dsco = { id: "a", name: "DS&CO", credits: 4, bunksUsed: 5 };
 assert(maxBunks(dsco) === 12, "DS&CO max = 12");
 assert(bunksRemaining(dsco) === 7, "DS&CO remaining = 7");
+assert(totalClassesOf(dsco) === 48, "DS&CO total classes = 48");
+assert(Math.round(attendanceOf(dsco) * 10) / 10 === 89.6, "DS&CO attendance = 89.6%");
 
 // Representative subject set
 const subjects = [
@@ -52,6 +57,15 @@ assert(t.subjects === 7, "7 subjects");
 assert(t.max === 54, `total max = 54 (got ${t.max})`);
 assert(t.used === 7, "total used = 7");
 assert(t.remaining === 47, `total remaining = 47 (got ${t.remaining})`);
+
+// Semester attendance: 216 classes total (54 * 4), 7 missed -> 209 attended = 96.8%
+assert(Math.round(semesterAttendanceOf(t) * 10) / 10 === 96.8, "semester attendance = 96.8%");
+
+// At 0 bunks used: attendance is 100%
+assert(semesterAttendanceOf({ subjects: 7, max: 54, used: 0, remaining: 54 }) === 100, "0 bunks used = 100% attendance");
+
+// At max bunks used: attendance is exactly 75%
+assert(semesterAttendanceOf({ subjects: 7, max: 54, used: 54, remaining: 0 }) === 75, "all allowed bunks used = 75% attendance");
 
 // Validation rules
 assert(isPositiveWhole(1) && isPositiveWhole(7), "positive whole accepts 1, 7");
